@@ -81,5 +81,7 @@ export const speakable = (text: string) =>
   text
     .replace(/₹([\d,]+)/g, (_, n: string) => spokenRupees(Number(n.replace(/,/g, ''))))
     .replace(/ × /g, ' times ')
+    .replace(/ \+ /g, ' plus ')
+    .replace(/ = /g, ' equals ')
     .replace(/[✓✅💡]/gu, '')
     .trim();

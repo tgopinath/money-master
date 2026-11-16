@@ -11,7 +11,7 @@ export function MoneyBank({ size, onAdd, className }: { size: MoneySize; onAdd(v
   const returning = active?.source === 'table';
 
   return (
-    <Panel tone="mint" step={1} className={className} title="Choose Your Money" subtitle="Drag onto the table — or just tap!" bodyClassName="relative xl:overflow-y-auto">
+    <Panel tone="mint" step={1} className={className} title="Choose Your Money" subtitle="Drag onto the table — or just tap!" announce="Choose your money. Drag it onto the table, or just tap it!" bodyClassName="relative xl:overflow-y-auto">
       <div ref={bankRef} className="relative h-full">
         <div className="flex gap-5 overflow-x-auto px-4 py-4 xl:block xl:overflow-visible xl:px-5">
           <div className="flex shrink-0 items-end gap-5 xl:mb-3 xl:justify-around xl:rounded-3xl xl:bg-mint-50 xl:py-3">

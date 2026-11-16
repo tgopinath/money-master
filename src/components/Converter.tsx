@@ -29,7 +29,13 @@ export function Converter({ items, total }: Props) {
           : `Wow! You're using the fewest pieces possible for ${rupees(total)}. ⭐`;
 
   return (
-    <Panel tone="lilac" step={3} title="Make Bigger Money" subtitle="Same money, fewer pieces" bodyClassName="flex flex-col gap-4 p-4 xl:overflow-y-auto">
+    <Panel
+      tone="lilac"
+      step={3}
+      title="Make Bigger Money"
+      subtitle="Same money, fewer pieces"
+      announce={`Make bigger money. ${total ? sumLine(yours, total) : 'Small money can join up into big money!'}`}
+      bodyClassName="flex flex-col gap-4 p-4 xl:overflow-y-auto">
       {total === 0 ? (
         <EmptyExample />
       ) : (

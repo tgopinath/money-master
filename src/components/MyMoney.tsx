@@ -27,6 +27,11 @@ export function MyMoney({ items, total, onRemove, onTapMoney, banner, actions }:
       tone="peach"
       step={2}
       title="My Money"
+      announce={
+        items.length
+          ? `My money. ${[notes && plural(notes, 'note', 'notes'), coins && plural(coins, 'coin', 'coins')].filter(Boolean).join(' and ')}. Total, ${rupees(total)}.`
+          : 'My money. Put your money on this table.'
+      }
       subtitle={
         items.length
           ? [notes && plural(notes, 'note', 'notes'), coins && plural(coins, 'coin', 'coins')].filter(Boolean).join(' · ')
