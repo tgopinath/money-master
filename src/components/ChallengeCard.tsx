@@ -1,6 +1,5 @@
 import { motion } from 'motion/react';
 import type { Challenge, ChallengeStatus } from '../lib/challenges';
-import { CHALLENGES } from '../lib/challenges';
 import { say, speakable } from '../lib/sound';
 import { KidButton } from './ui';
 
@@ -28,14 +27,9 @@ export function ChallengeCard({ challenge, index, status, completed, onPrev, onN
           </motion.span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-violet-600">
-              Challenge {index + 1} of {CHALLENGES.length}
-              <span className="flex gap-0.5 normal-case">
-                {CHALLENGES.map((c) => (
-                  <span key={c.id} className={completed.includes(c.id) ? '' : 'opacity-20 grayscale'}>
-                    ⭐
-                  </span>
-                ))}
-              </span>
+              Challenge {index + 1}
+              {completed.includes(challenge.id) && <span className="normal-case">✅ solved</span>}
+              <span className="ml-auto whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 normal-case text-amber-700">⭐ {completed.length}</span>
             </div>
             <div className="flex items-start gap-2">
               <h3 className="text-xl font-extrabold leading-tight text-ink sm:text-2xl">{challenge.title}</h3>
@@ -54,7 +48,7 @@ export function ChallengeCard({ challenge, index, status, completed, onPrev, onN
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-1.5 sm:flex-row">
-            <KidButton aria-label="Previous challenge" className="!px-3 !py-1.5" onClick={onPrev}>
+            <KidButton aria-label="Previous challenge" className="!px-3 !py-1.5" onClick={onPrev} disabled={index === 0}>
               ◀
             </KidButton>
             <KidButton aria-label="Next challenge" className="!px-3 !py-1.5" onClick={onNext}>

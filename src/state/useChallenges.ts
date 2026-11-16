@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CHALLENGES, type Challenge } from '../lib/challenges';
+import { challengeAt, type Challenge } from '../lib/challenges';
 import type { Denomination } from '../lib/currency';
 import { useStoredState } from '../hooks/useStoredState';
 
 export function useChallenges(values: Denomination[], onComplete: () => void) {
   const [on, setOn] = useState(false);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useStoredState('money-master:level', 0);
   const [memory, setMemory] = useState<Record<string, string[]>>({});
   const [completed, setCompleted] = useStoredState<string[]>('money-master:stars', []);
   const [celebrating, setCelebrating] = useState<Challenge | null>(null);
   const satisfied = useRef<string | null>(null);
 
-  const challenge = CHALLENGES[index];
+  const challenge = challengeAt(index);
   const remembered = memory[challenge.id];
   const status = useMemo(() => (on ? challenge.evaluate(values, remembered ?? []) : null), [on, challenge, values, remembered]);
 
@@ -34,9 +34,9 @@ export function useChallenges(values: Denomination[], onComplete: () => void) {
   }, [status, challenge, remembered, setCompleted, onComplete]);
 
   const goTo = (i: number) => {
-    const next = (i + CHALLENGES.length) % CHALLENGES.length;
+    const next = Math.max(0, i);
     satisfied.current = null;
-    setMemory((m) => ({ ...m, [CHALLENGES[next].id]: [] }));
+    setMemory((m) => ({ ...m, [challengeAt(next).id]: [] }));
     setIndex(next);
     setCelebrating(null);
   };
@@ -49,7 +49,6 @@ export function useChallenges(values: Denomination[], onComplete: () => void) {
     },
     challenge,
     index,
-    total: CHALLENGES.length,
     status,
     completed,
     celebrating,
