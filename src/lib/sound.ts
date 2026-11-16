@@ -47,3 +47,20 @@ export const sfx = {
   exchange: () => arpeggio([523, 659, 784, 1047], 0.07),
   win: () => arpeggio([523, 659, 784, 1047, 1319, 1568], 0.09),
 };
+
+/** Reads text aloud with the browser's speech engine, preferring an Indian English voice. */
+export function say(text: string) {
+  if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const synth = window.speechSynthesis;
+  synth.cancel(); // a fresh tap interrupts the previous announcement
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = synth.getVoices();
+  const voice = voices.find((v) => v.lang === 'en-IN') ?? voices.find((v) => v.lang.startsWith('en'));
+  if (voice) utterance.voice = voice;
+  utterance.lang = voice?.lang ?? 'en-IN';
+  utterance.rate = 0.95;
+  utterance.pitch = 1.1;
+  synth.speak(utterance);
+}
+
+export const spokenRupees = (n: number) => `${n.toLocaleString('en-IN')} ${n === 1 ? 'rupee' : 'rupees'}`;

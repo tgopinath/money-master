@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CURRENCY, groupValues, type Combination } from '../lib/currency';
+import { CURRENCY, groupValues, type Combination, type Denomination } from '../lib/currency';
 import { plural, rupees } from '../lib/format';
 import { useDrag } from '../drag/DragProvider';
 import type { MoneyItem, Point } from '../state/useMoney';
@@ -17,10 +17,11 @@ interface Props {
   merging: Merge | null;
   flash: (Point & { key: number }) | null;
   onRemove(id: string): void;
+  onTapMoney(value: Denomination): void;
   banner?: ReactNode;
 }
 
-export function MyMoney({ items, total, merging, flash, onRemove, banner }: Props) {
+export function MyMoney({ items, total, merging, flash, onRemove, onTapMoney, banner }: Props) {
   const parts = groupValues(items.map((i) => i.value));
   const notes = items.filter((i) => CURRENCY[i.value].kind === 'note').length;
   const coins = items.length - notes;
@@ -30,7 +31,11 @@ export function MyMoney({ items, total, merging, flash, onRemove, banner }: Prop
       tone="peach"
       step={2}
       title="My Money"
-      subtitle={items.length ? `${plural(notes, 'note', 'notes')} · ${plural(coins, 'coin', 'coins')}` : 'Your money table'}
+      subtitle={
+        items.length
+          ? [notes && plural(notes, 'note', 'notes'), coins && plural(coins, 'coin', 'coins')].filter(Boolean).join(' · ')
+          : 'Your money table'
+      }
       right={
         <div className="text-right">
           <div className="text-xs font-bold uppercase tracking-wider text-ink/50">Total</div>
@@ -40,13 +45,13 @@ export function MyMoney({ items, total, merging, flash, onRemove, banner }: Prop
       bodyClassName="flex flex-col gap-3 p-3 sm:p-4"
     >
       {banner}
-      <MoneyTable items={items} merging={merging} flash={flash} onRemove={onRemove} />
+      <MoneyTable items={items} merging={merging} flash={flash} onRemove={onRemove} onTapMoney={onTapMoney} />
       <CountMyMoney parts={parts} total={total} />
     </Panel>
   );
 }
 
-function MoneyTable({ items, merging, flash, onRemove }: Omit<Props, 'total' | 'banner'>) {
+function MoneyTable({ items, merging, flash, onRemove, onTapMoney }: Omit<Props, 'total' | 'banner'>) {
   const { tableRef, begin, active, over } = useDrag();
   const adding = active?.source === 'bank';
 
@@ -103,7 +108,7 @@ function MoneyTable({ items, merging, flash, onRemove }: Omit<Props, 'total' | '
               transition={
                 held ? { duration: 0 } : isMerging ? { duration: 0.6, ease: [0.6, 0, 0.4, 1] } : { type: 'spring', stiffness: 380, damping: 22 }
               }
-              onPointerDown={(e) => begin(e, { source: 'table', id: item.id, value: item.value, size: 'md' })}
+              onPointerDown={(e) => begin(e, { source: 'table', id: item.id, value: item.value, size: 'md' }, () => onTapMoney(item.value))}
             >
               <div className="drop-shadow-[0_5px_6px_rgba(43,33,66,0.25)]">
                 <Money value={item.value} size="md" />

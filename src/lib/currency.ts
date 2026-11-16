@@ -100,16 +100,11 @@ export function fewestPieces(total: number, allowed: readonly Denomination[]): C
 
 const mergeParts = (...lists: Combination[]) => groupValues(lists.flatMap(expandParts));
 
-export interface Way {
-  parts: Combination;
-  label: string;
-}
-
 /**
  * Several different ways to make `total`, fewest pieces first. Every way is checked
  * to add up to exactly `total`; ways that would need too many pieces to show are skipped.
  */
-export function alternativeCombinations(total: number, limit = 6, maxPieces = 20): Way[] {
+export function alternativeCombinations(total: number, limit = 6, maxPieces = 20): Combination[] {
   const fewest = greedyChange(total);
   if (!fewest || total === 0) return [];
 
@@ -141,10 +136,7 @@ export function alternativeCombinations(total: number, limit = 6, maxPieces = 20
     })
     .sort((a, b) => countPieces(a) - countPieces(b));
 
-  return [fewest, ...others].slice(0, limit).map((parts, i) => ({
-    parts,
-    label: i === 0 ? 'Fewest pieces' : parts.length === 1 ? `Only ₹${parts[0].value}` : 'A mix',
-  }));
+  return [fewest, ...others].slice(0, limit);
 }
 
 export interface Exchange {

@@ -12,9 +12,9 @@ interface Props {
   onToggleChallenge(): void;
 }
 
-export function Footer({ canUndo, hasMoney, challengeOn, stars, busy, onUndo, onReset, onTidy, onToggleChallenge }: Props) {
+export function Toolbar({ canUndo, hasMoney, challengeOn, stars, busy, onUndo, onReset, onTidy, onToggleChallenge }: Props) {
   return (
-    <footer className="sticky bottom-0 z-40 flex items-center justify-center gap-1.5 border-t border-ink/5 bg-cream/85 px-4 py-3 backdrop-blur sm:gap-3 xl:static xl:border-0 xl:bg-transparent xl:pt-0 xl:backdrop-blur-none">
+    <div className="flex items-center gap-1.5 sm:gap-2">
       <KidButton aria-label="Undo" onClick={onUndo} disabled={!canUndo || busy}>
         ↩️<span className="max-[420px]:hidden"> Undo</span>
       </KidButton>
@@ -24,10 +24,10 @@ export function Footer({ canUndo, hasMoney, challengeOn, stars, busy, onUndo, on
       <KidButton aria-label="Reset" variant="rose" onClick={onReset} disabled={!hasMoney || busy}>
         🧹<span className="max-[420px]:hidden"> Reset</span>
       </KidButton>
-      <KidButton variant={challengeOn ? 'violet' : 'mint'} className="sm:px-6 sm:py-3 sm:text-xl" onClick={onToggleChallenge} aria-pressed={challengeOn}>
-        🏅 <span className="max-sm:hidden">{challengeOn ? 'Exit Challenges' : 'Challenge Mode'}</span><span className="sm:hidden">{challengeOn ? 'Exit' : 'Challenges'}</span>
-        <span className="rounded-full bg-white/25 px-2 text-base">⭐ {stars}</span>
+      <KidButton variant={challengeOn ? 'violet' : 'mint'} aria-label={challengeOn ? 'Exit challenges' : 'Challenge mode'} onClick={onToggleChallenge} aria-pressed={challengeOn}>
+        🏅 <span className="max-sm:hidden">{challengeOn ? 'Exit Challenges' : 'Challenge Mode'}</span>
+        <span className="whitespace-nowrap rounded-full bg-white/25 px-2 text-base">⭐ {stars}</span>
       </KidButton>
-    </footer>
+    </div>
   );
 }

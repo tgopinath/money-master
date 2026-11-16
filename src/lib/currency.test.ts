@@ -42,7 +42,7 @@ describe('fewestPieces', () => {
 
 describe('alternativeCombinations', () => {
   it('lists the classic ways to make ₹100', () => {
-    const ways = alternativeCombinations(100).map((w) => w.parts);
+    const ways = alternativeCombinations(100);
     expect(ways[0]).toEqual([{ value: 100, count: 1 }]);
     expect(ways).toContainEqual([{ value: 50, count: 2 }]);
     expect(ways).toContainEqual([{ value: 20, count: 5 }]);
@@ -53,10 +53,10 @@ describe('alternativeCombinations', () => {
     for (let total = 1; total <= 1200; total++) {
       const ways = alternativeCombinations(total);
       expect(ways.length).toBeGreaterThan(0);
-      const keys = new Set(ways.map((w) => JSON.stringify(w.parts)));
+      const keys = new Set(ways.map((w) => JSON.stringify(w)));
       expect(keys.size).toBe(ways.length);
-      for (const w of ways) expect(sumParts(w.parts)).toBe(total);
-      expect(countPieces(ways[0].parts)).toBe(countPieces(greedyChange(total)!));
+      for (const w of ways) expect(sumParts(w)).toBe(total);
+      expect(countPieces(ways[0])).toBe(countPieces(greedyChange(total)!));
     }
   });
 });

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { findExchange, isCoin, sumValues, type Denomination, type Exchange } from './lib/currency';
-import { setMuted, sfx } from './lib/sound';
+import { say, setMuted, sfx, spokenRupees } from './lib/sound';
 import { useMoney, type Point } from './state/useMoney';
 import { useChallenges } from './state/useChallenges';
 import { useStoredState } from './hooks/useStoredState';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { DragProvider, type DragPayload, type DropInfo } from './drag/DragProvider';
 import { Header } from './components/Header';
-import { Footer } from './components/Footer';
+import { Toolbar } from './components/Toolbar';
 import { MoneyBank } from './components/MoneyBank';
 import { MyMoney, type Merge } from './components/MyMoney';
 import { Converter } from './components/Converter';
@@ -44,8 +44,9 @@ export default function App() {
     (value: Denomination, at?: Point) => {
       money.add(value, at);
       (isCoin(value) ? sfx.coin : sfx.note)();
+      say(`${spokenRupees(value)}. Total, ${spokenRupees(total + value)}.`);
     },
-    [money],
+    [money, total],
   );
 
   const remove = useCallback(
@@ -100,11 +101,21 @@ export default function App() {
     <DragProvider onDrop={handleDrop} disabled={!!exchanging}>
       <div className="flex min-h-dvh flex-col xl:h-dvh xl:min-h-[720px]">
         <Header
-          total={total}
           muted={muted}
           onToggleMute={() => setMutedState((m) => !m)}
-          onReset={money.reset}
-          canReset={items.length > 0 && !exchanging}
+          actions={
+            <Toolbar
+              canUndo={money.canUndo}
+              hasMoney={items.length > 0}
+              challengeOn={challenges.on}
+              stars={challenges.completed.length}
+              busy={!!exchanging}
+              onUndo={money.undo}
+              onReset={money.reset}
+              onTidy={money.tidy}
+              onToggleChallenge={challenges.toggle}
+            />
+          }
         />
 
         <main className="grid min-h-0 flex-1 gap-4 p-4 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(340px,1fr)] xl:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)_minmax(330px,1fr)]">
@@ -115,6 +126,7 @@ export default function App() {
             merging={exchanging?.merge ?? null}
             flash={flash}
             onRemove={remove}
+            onTapMoney={(value) => say(spokenRupees(value))}
             banner={
               <AnimatePresence>
                 {challenges.on && (
@@ -139,17 +151,6 @@ export default function App() {
           />
         </main>
 
-        <Footer
-          canUndo={money.canUndo}
-          hasMoney={items.length > 0}
-          challengeOn={challenges.on}
-          stars={challenges.completed.length}
-          busy={!!exchanging}
-          onUndo={money.undo}
-          onReset={money.reset}
-          onTidy={money.tidy}
-          onToggleChallenge={challenges.toggle}
-        />
         <p className="px-4 pb-2 text-center text-[11px] font-semibold text-ink/35">
           Currency images: Reserve Bank of India specimens &amp; Wikimedia Commons (GODL-India, CC0)
         </p>

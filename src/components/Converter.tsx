@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { alternativeCombinations, countPieces, greedyChange, groupValues, type Exchange } from '../lib/currency';
-import { describeParts, equation, plural, rupees } from '../lib/format';
+import { alternativeCombinations, countPieces, greedyChange, groupValues, signatureOf, type Combination, type Exchange } from '../lib/currency';
+import { describeParts, plural, rupees } from '../lib/format';
 import type { MoneyItem } from '../state/useMoney';
 import { Mascot } from './Mascot';
 import { Money } from './money/Money';
@@ -26,7 +26,7 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
     total === 0
       ? "Hi, I'm Gullu! Put some money on the table and I'll show you how to make bigger money."
       : nextExchange
-        ? `Psst! ${describeParts(nextExchange.from)} is the same as ${describeParts(nextExchange.to)}. Press "Exchange Money"!`
+        ? 'Smaller money can join up! Press "Exchange Money" and watch.'
         : pieces === 1
           ? `One ${rupees(total)} piece. Can you make the same amount with smaller money?`
           : `Wow! You're using the fewest pieces possible for ${rupees(total)}. ⭐`;
@@ -49,14 +49,6 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
             <Row label="Same as" detail={`${plural(fewestCount, 'piece', 'pieces')} · fewest`}>
               <PieceGroup parts={fewest} size="sm" />
             </Row>
-            {pieces > fewestCount && (
-              <p className="mt-3 rounded-2xl bg-lilac-50 px-3 py-2 text-center font-bold text-violet-700">
-                {plural(pieces, 'piece', 'pieces')} ➜ {plural(fewestCount, 'piece', 'pieces')}, but still {rupees(total)}!
-              </p>
-            )}
-            <p className="mt-2 text-center text-base font-bold text-ink/60">
-              {equation(yours)} = {rupees(total)}
-            </p>
 
             <AnimatePresence>{exchanging && <ExchangeBanner exchange={exchanging} />}</AnimatePresence>
           </div>
@@ -77,7 +69,7 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
             </p>
           </div>
 
-          <OtherWays key={total} total={total} />
+          <OtherWays key={total} total={total} yours={yours} />
         </>
       )}
       <Mascot message={tip} className="mt-auto" />
@@ -122,17 +114,20 @@ function ExchangeBanner({ exchange }: { exchange: Exchange }) {
   );
 }
 
-function OtherWays({ total }: { total: number }) {
-  const ways = alternativeCombinations(total);
+/** Ways to make the total other than the fewest (shown above) and the money already on the table. */
+function OtherWays({ total, yours }: { total: number; yours: Combination }) {
+  const ways = alternativeCombinations(total)
+    .slice(1)
+    .filter((way) => signatureOf(way) !== signatureOf(yours));
   const [index, setIndex] = useState(0);
-  if (ways.length < 2) return null;
+  if (!ways.length) return null;
   const way = ways[index];
   const go = (step: number) => setIndex((i) => (i + step + ways.length) % ways.length);
 
   return (
     <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-lg font-extrabold text-ink">More ways to make {rupees(total)}</h3>
+        <h3 className="text-lg font-extrabold text-ink">Other ways to make it</h3>
         <span className="shrink-0 rounded-full bg-lilac-100 px-3 py-0.5 text-sm font-extrabold text-violet-700">
           Way {index + 1} of {ways.length}
         </span>
@@ -151,11 +146,8 @@ function OtherWays({ total }: { total: number }) {
               transition={{ duration: 0.18 }}
               className="flex flex-col items-center gap-2"
             >
-              <PieceGroup parts={way.parts} size="xs" maxLoose={10} />
-              <p className="text-center text-lg font-extrabold text-ink">
-                {describeParts(way.parts)} <span className="text-ink/40">=</span> {rupees(total)}
-              </p>
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/45">{way.label}</span>
+              <PieceGroup parts={way} size="xs" maxLoose={10} />
+              <p className="text-center text-lg font-extrabold text-ink">{describeParts(way)}</p>
             </motion.div>
           </AnimatePresence>
         </div>
