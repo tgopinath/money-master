@@ -8,7 +8,7 @@ import { useStoredState } from './hooks/useStoredState';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { DragProvider, type DragPayload, type DropInfo } from './drag/DragProvider';
 import { Header } from './components/Header';
-import { Toolbar } from './components/Toolbar';
+import { ChallengeToggle, TableActions } from './components/Toolbar';
 import { MoneyBank } from './components/MoneyBank';
 import { MyMoney } from './components/MyMoney';
 import { Converter } from './components/Converter';
@@ -77,18 +77,7 @@ export default function App() {
         <Header
           muted={muted}
           onToggleMute={() => setMutedState((m) => !m)}
-          actions={
-            <Toolbar
-              canUndo={money.canUndo}
-              hasMoney={items.length > 0}
-              challengeOn={challenges.on}
-              stars={challenges.completed.length}
-              onUndo={money.undo}
-              onReset={money.reset}
-              onTidy={money.tidy}
-              onToggleChallenge={challenges.toggle}
-            />
-          }
+          actions={<ChallengeToggle on={challenges.on} stars={challenges.completed.length} onToggle={challenges.toggle} />}
         />
 
         <main className="grid min-h-0 flex-1 gap-4 p-4 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(340px,1fr)] xl:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)_minmax(330px,1fr)]">
@@ -98,6 +87,9 @@ export default function App() {
             total={total}
             onRemove={remove}
             onTapMoney={(value) => say(spokenRupees(value))}
+            actions={
+              <TableActions canUndo={money.canUndo} hasMoney={items.length > 0} onUndo={money.undo} onReset={money.reset} onTidy={money.tidy} />
+            }
             banner={
               <AnimatePresence>
                 {challenges.on && (

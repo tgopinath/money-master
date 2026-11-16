@@ -13,9 +13,11 @@ interface Props {
   onRemove(id: string): void;
   onTapMoney(value: Denomination): void;
   banner?: ReactNode;
+  /** Buttons pinned to the bottom right of the card. */
+  actions?: ReactNode;
 }
 
-export function MyMoney({ items, total, onRemove, onTapMoney, banner }: Props) {
+export function MyMoney({ items, total, onRemove, onTapMoney, banner, actions }: Props) {
   const parts = groupValues(items.map((i) => i.value));
   const notes = items.filter((i) => CURRENCY[i.value].kind === 'note').length;
   const coins = items.length - notes;
@@ -41,11 +43,12 @@ export function MyMoney({ items, total, onRemove, onTapMoney, banner }: Props) {
       {banner}
       <MoneyTable items={items} onRemove={onRemove} onTapMoney={onTapMoney} />
       <CountMyMoney parts={parts} total={total} />
+      {actions}
     </Panel>
   );
 }
 
-function MoneyTable({ items, onRemove, onTapMoney }: Omit<Props, 'total' | 'banner'>) {
+function MoneyTable({ items, onRemove, onTapMoney }: Omit<Props, 'total' | 'banner' | 'actions'>) {
   const { tableRef, begin, active, over } = useDrag();
   const adding = active?.source === 'bank';
 

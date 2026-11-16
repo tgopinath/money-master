@@ -1,19 +1,17 @@
 import { KidButton } from './ui';
 
-interface Props {
+interface TableActionsProps {
   canUndo: boolean;
   hasMoney: boolean;
-  challengeOn: boolean;
-  stars: number;
   onUndo(): void;
   onReset(): void;
   onTidy(): void;
-  onToggleChallenge(): void;
 }
 
-export function Toolbar({ canUndo, hasMoney, challengeOn, stars, onUndo, onReset, onTidy, onToggleChallenge }: Props) {
+/** Undo / Tidy up / Reset, shown at the bottom right of the My Money card. */
+export function TableActions({ canUndo, hasMoney, onUndo, onReset, onTidy }: TableActionsProps) {
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2">
+    <div className="flex shrink-0 items-center justify-end gap-2">
       <KidButton aria-label="Undo" onClick={onUndo} disabled={!canUndo}>
         ↩️<span className="max-[420px]:hidden"> Undo</span>
       </KidButton>
@@ -23,10 +21,21 @@ export function Toolbar({ canUndo, hasMoney, challengeOn, stars, onUndo, onReset
       <KidButton aria-label="Reset" variant="rose" onClick={onReset} disabled={!hasMoney}>
         🧹<span className="max-[420px]:hidden"> Reset</span>
       </KidButton>
-      <KidButton variant={challengeOn ? 'violet' : 'mint'} aria-label={challengeOn ? 'Exit challenges' : 'Challenge mode'} onClick={onToggleChallenge} aria-pressed={challengeOn}>
-        🏅 <span className="max-sm:hidden">{challengeOn ? 'Exit Challenges' : 'Challenge Mode'}</span>
-        <span className="whitespace-nowrap rounded-full bg-white/25 px-2 text-base">⭐ {stars}</span>
-      </KidButton>
     </div>
+  );
+}
+
+interface ChallengeToggleProps {
+  on: boolean;
+  stars: number;
+  onToggle(): void;
+}
+
+export function ChallengeToggle({ on, stars, onToggle }: ChallengeToggleProps) {
+  return (
+    <KidButton variant={on ? 'violet' : 'mint'} aria-label={on ? 'Exit challenges' : 'Challenge mode'} onClick={onToggle} aria-pressed={on}>
+      🏅 <span className="max-sm:hidden">{on ? 'Exit Challenges' : 'Challenge Mode'}</span>
+      <span className="whitespace-nowrap rounded-full bg-white/25 px-2 text-base">⭐ {stars}</span>
+    </KidButton>
   );
 }
