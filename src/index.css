@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+
+  --color-ink: #2b2142;
+  --color-cream: #fff6ea;
+
+  --color-saffron-50: #fff4ea;
+  --color-saffron-300: #ffc08f;
+  --color-saffron-500: #ff8a3d;
+  --color-saffron-600: #ee6f1c;
+  --color-saffron-700: #c55410;
+
+  --color-peach-50: #fff7f0;
+  --color-peach-100: #ffe9d8;
+  --color-peach-200: #ffd9bd;
+
+  --color-mint-50: #effaf5;
+  --color-mint-100: #dcf5ea;
+  --color-mint-300: #8fe0bf;
+  --color-mint-500: #14b88a;
+  --color-mint-700: #0b7d5d;
+
+  --color-lilac-50: #f7f4ff;
+  --color-lilac-100: #ece6ff;
+  --color-lilac-200: #ddd3ff;
+  --color-lilac-300: #c6b6ff;
+
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 18px 40px -18px rgba(43, 33, 66, 0.28);
+
+  --animate-bob: bob 3s ease-in-out infinite;
+  --animate-nudge: nudge 1.6s ease-in-out infinite;
+  --animate-coin-drop: coin-drop 3s ease-in infinite;
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-5px) rotate(2deg); }
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(12px); }
+  }
+  @keyframes coin-drop {
+    0%, 55% { transform: translateY(-6px); opacity: 0; }
+    65% { opacity: 1; }
+    90% { transform: translateY(6px); opacity: 1; }
+    100% { transform: translateY(8px); opacity: 0; }
+  }
+}
+
+html,
+body {
+  background:
+    radial-gradient(60rem 30rem at 0% 0%, #dcf5ea 0%, transparent 60%),
+    radial-gradient(50rem 30rem at 100% 0%, #ece6ff 0%, transparent 60%),
+    radial-gradient(60rem 40rem at 50% 110%, #ffe9d8 0%, transparent 60%),
+    #fff6ea;
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}
+
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+/* The play table: warm paper with a soft dot grid. */
+.table-mat {
+  background-color: #fffdf8;
+  background-image: radial-gradient(rgba(255, 138, 61, 0.16) 1.4px, transparent 1.6px);
+  background-size: 22px 22px;
+}
+
+/* Remove buttons appear on hover for mouse users, and stay visible on touch screens. */
+@media (hover: hover) {
+  .money-item .remove-btn {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  .money-item:hover .remove-btn,
+  .money-item .remove-btn:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

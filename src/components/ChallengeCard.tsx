@@ -1,0 +1,57 @@
+import { motion } from 'motion/react';
+import type { Challenge, ChallengeStatus } from '../lib/challenges';
+import { CHALLENGES } from '../lib/challenges';
+import { KidButton } from './ui';
+
+interface Props {
+  challenge: Challenge;
+  index: number;
+  status: ChallengeStatus | null;
+  completed: string[];
+  onPrev(): void;
+  onNext(): void;
+}
+
+export function ChallengeCard({ challenge, index, status, completed, onPrev, onNext }: Props) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: 'auto' }}
+      exit={{ opacity: 0, y: -10, height: 0 }}
+      className="shrink-0 overflow-hidden"
+    >
+      <div className="rounded-3xl bg-gradient-to-r from-violet-500 to-fuchsia-500 p-[3px] shadow-md">
+        <div className="flex items-center gap-3 rounded-[21px] bg-white px-3 py-2.5 sm:px-4">
+          <motion.span key={challenge.id} initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} className="text-4xl">
+            {challenge.emoji}
+          </motion.span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-violet-600">
+              Challenge {index + 1} of {CHALLENGES.length}
+              <span className="flex gap-0.5 normal-case">
+                {CHALLENGES.map((c) => (
+                  <span key={c.id} className={completed.includes(c.id) ? '' : 'opacity-20 grayscale'}>
+                    ⭐
+                  </span>
+                ))}
+              </span>
+            </div>
+            <h3 className="text-xl font-extrabold leading-tight text-ink sm:text-2xl">{challenge.title}</h3>
+            <p className={`text-sm font-bold sm:text-base ${status?.done ? 'text-mint-700' : 'text-ink/60'}`}>
+              {status?.done ? '✅ ' : '💡 '}
+              {status?.message ?? challenge.hint}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col gap-1.5 sm:flex-row">
+            <KidButton aria-label="Previous challenge" className="!px-3 !py-1.5" onClick={onPrev}>
+              ◀
+            </KidButton>
+            <KidButton aria-label="Next challenge" className="!px-3 !py-1.5" onClick={onNext}>
+              ▶
+            </KidButton>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
