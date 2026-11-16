@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { alternativeCombinations, countPieces, greedyChange, groupValues, signatureOf, type Combination } from '../lib/currency';
-import { describeParts, plural, rupees } from '../lib/format';
+import { alternativeCombinations, countPieces, expandParts, greedyChange, groupValues, signatureOf, type Combination } from '../lib/currency';
+import { describeParts, rupees } from '../lib/format';
 import type { MoneyItem } from '../state/useMoney';
 import { Mascot } from './Mascot';
 import { Money } from './money/Money';
@@ -23,7 +23,7 @@ export function Converter({ items, total }: Props) {
     total === 0
       ? "Hi, I'm Gullu! Put some money on the table and I'll show you how to make bigger money."
       : pieces > fewestCount
-        ? `Look! Your ${pieces} pieces are the same as just ${fewestCount}. Small money joins up into big money!`
+        ? `${pieces} pieces became just ${fewestCount}! Try the other ways below to make ${rupees(total)} too.`
         : pieces === 1
           ? `One ${rupees(total)} piece. Can you make the same amount with smaller money?`
           : `Wow! You're using the fewest pieces possible for ${rupees(total)}. ⭐`;
@@ -34,20 +34,7 @@ export function Converter({ items, total }: Props) {
         <EmptyExample />
       ) : (
         <>
-          <div className="relative rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-            <Row label="You have" detail={plural(pieces, 'piece', 'pieces')}>
-              <PieceGroup parts={yours} size="sm" />
-            </Row>
-            <div className="my-3 flex items-center gap-3">
-              <div className="h-0.5 flex-1 rounded bg-lilac-200" />
-              <span className="rounded-full bg-violet-500 px-4 py-1 text-2xl font-extrabold text-white shadow">= {rupees(total)}</span>
-              <div className="h-0.5 flex-1 rounded bg-lilac-200" />
-            </div>
-            <Row label="Same as" detail={`${plural(fewestCount, 'piece', 'pieces')} · fewest`}>
-              <PieceGroup parts={fewest} size="sm" />
-            </Row>
-
-          </div>
+          <CombinedMoney yours={yours} fewest={fewest} total={total} />
 
           <OtherWays key={total} total={total} yours={yours} />
         </>
@@ -57,14 +44,35 @@ export function Converter({ items, total }: Props) {
   );
 }
 
-function Row({ label, detail, children }: { label: string; detail: string; children: React.ReactNode }) {
+/** "₹10 + ₹10 = ₹20", grouped as "2 × ₹10 + …" when there are too many pieces to list. */
+function sumLine(parts: Combination, total: number, maxTerms = 8) {
+  const terms = countPieces(parts) > maxTerms ? describeParts(parts) : expandParts(parts).map(rupees).join(' + ');
+  return `${terms} = ${rupees(total)}`;
+}
+
+/** The money on the table joined with "+", then "=" the same total in the fewest pieces. */
+function CombinedMoney({ yours, fewest, total }: { yours: Combination; fewest: Combination; total: number }) {
+  const joins = countPieces(fewest) < countPieces(yours);
   return (
-    <div>
-      <div className="mb-2 flex items-baseline justify-between">
-        <span className="text-sm font-extrabold uppercase tracking-wider text-ink/50">{label}</span>
-        <span className="text-sm font-bold text-ink/45">{detail}</span>
-      </div>
-      {children}
+    <div className="rounded-3xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5">
+      <p className="mb-4 text-lg font-extrabold text-ink">
+        {joins ? 'Your money joins up into bigger money!' : 'That’s already the biggest money!'}
+      </p>
+      <PieceGroup parts={yours} size="sm" joined />
+      {joins && (
+        <>
+          <div className="my-2 text-3xl font-extrabold text-violet-500">=</div>
+          <motion.div
+            key={signatureOf(fewest)}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 14 }}
+          >
+            <PieceGroup parts={fewest} size="md" joined />
+          </motion.div>
+        </>
+      )}
+      <p className="mt-3 font-bold text-ink/60">{sumLine(yours, total)}</p>
     </div>
   );
 }
