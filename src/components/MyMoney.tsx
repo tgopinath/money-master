@@ -172,7 +172,7 @@ function CountMyMoney({ parts, total }: { parts: Combination; total: number }) {
       <div className="mb-2 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-saffron-700">
         <span>🧮 Count my money</span>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         <AnimatePresence initial={false}>
           {parts.map((p) => (
             <motion.div

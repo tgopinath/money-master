@@ -71,6 +71,14 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Content still scrolls (touch, trackpad, wheel), but scrollbars stay hidden for a cleaner, app-like look. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
 body.is-dragging,
 body.is-dragging * {
   cursor: grabbing !important;
