@@ -1,0 +1,8 @@
+{
+  "appId": "com.gopinath.moneymaster",
+  "appName": "Money Master",
+  "webDir": "dist",
+  "backgroundColor": "#FFF6EA",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never", "backgroundColor": "#FFF6EA" }
+}

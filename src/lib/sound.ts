@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+
 let ctx: AudioContext | null = null;
 let muted = false;
 
@@ -48,9 +51,19 @@ export const sfx = {
   win: () => arpeggio([523, 659, 784, 1047, 1319, 1568], 0.09),
 };
 
-/** Reads text aloud with the browser's speech engine, preferring an Indian English voice. */
+/**
+ * Reads text aloud, preferring an Indian English voice. Inside the Android/iOS apps this uses the
+ * native speech engine (Android's WebView has no Web Speech API); in browsers it uses speechSynthesis.
+ */
 export function say(text: string) {
-  if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  if (muted || typeof window === 'undefined') return;
+  if (Capacitor.isNativePlatform()) {
+    void TextToSpeech.stop()
+      .then(() => TextToSpeech.speak({ text, lang: 'en-IN', rate: 0.95, pitch: 1.1, category: 'ambient' }))
+      .catch(() => {});
+    return;
+  }
+  if (!('speechSynthesis' in window)) return;
   const synth = window.speechSynthesis;
   synth.cancel(); // a fresh tap interrupts the previous announcement
   const utterance = new SpeechSynthesisUtterance(text);
@@ -64,3 +77,11 @@ export function say(text: string) {
 }
 
 export const spokenRupees = (n: number) => `${n.toLocaleString('en-IN')} ${n === 1 ? 'rupee' : 'rupees'}`;
+
+/** Turns on-screen text like "Make ₹20 with 2 × ₹10" into words a speech engine reads naturally. */
+export const speakable = (text: string) =>
+  text
+    .replace(/₹([\d,]+)/g, (_, n: string) => spokenRupees(Number(n.replace(/,/g, ''))))
+    .replace(/ × /g, ' times ')
+    .replace(/[✓✅💡]/gu, '')
+    .trim();

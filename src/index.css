@@ -60,6 +60,11 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Keep content clear of the notch, Dynamic Island and home indicator in the iOS/Android apps. */
+#root {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
