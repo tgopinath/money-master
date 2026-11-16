@@ -57,16 +57,6 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
             <KidButton variant="saffron" big className="w-full" disabled={!nextExchange || !!exchanging} onClick={onExchange}>
               <span className="text-2xl">🔄</span> Exchange Money
             </KidButton>
-            <p className="mt-2 text-center text-[15px] font-bold text-ink/65">
-              {nextExchange ? (
-                <>
-                  Swap <span className="text-saffron-700">{describeParts(nextExchange.from)}</span> for{' '}
-                  <span className="text-violet-700">{describeParts(nextExchange.to)}</span>
-                </>
-              ) : (
-                'Nothing to swap — already the fewest pieces!'
-              )}
-            </p>
           </div>
 
           <OtherWays key={total} total={total} yours={yours} />
