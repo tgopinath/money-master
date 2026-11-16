@@ -5,23 +5,22 @@ interface Props {
   hasMoney: boolean;
   challengeOn: boolean;
   stars: number;
-  busy: boolean;
   onUndo(): void;
   onReset(): void;
   onTidy(): void;
   onToggleChallenge(): void;
 }
 
-export function Toolbar({ canUndo, hasMoney, challengeOn, stars, busy, onUndo, onReset, onTidy, onToggleChallenge }: Props) {
+export function Toolbar({ canUndo, hasMoney, challengeOn, stars, onUndo, onReset, onTidy, onToggleChallenge }: Props) {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      <KidButton aria-label="Undo" onClick={onUndo} disabled={!canUndo || busy}>
+      <KidButton aria-label="Undo" onClick={onUndo} disabled={!canUndo}>
         ↩️<span className="max-[420px]:hidden"> Undo</span>
       </KidButton>
-      <KidButton aria-label="Tidy up" onClick={onTidy} disabled={!hasMoney || busy}>
+      <KidButton aria-label="Tidy up" onClick={onTidy} disabled={!hasMoney}>
         🗂️<span className="max-[420px]:hidden"> Tidy up</span>
       </KidButton>
-      <KidButton aria-label="Reset" variant="rose" onClick={onReset} disabled={!hasMoney || busy}>
+      <KidButton aria-label="Reset" variant="rose" onClick={onReset} disabled={!hasMoney}>
         🧹<span className="max-[420px]:hidden"> Reset</span>
       </KidButton>
       <KidButton variant={challengeOn ? 'violet' : 'mint'} aria-label={challengeOn ? 'Exit challenges' : 'Challenge mode'} onClick={onToggleChallenge} aria-pressed={challengeOn}>

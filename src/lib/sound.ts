@@ -46,8 +46,6 @@ export const sfx = {
   },
   note: () => tone(420, 0, 0.14, 'sine', 0.1, 760),
   remove: () => tone(520, 0, 0.16, 'sine', 0.08, 240),
-  whoosh: () => tone(300, 0, 0.5, 'sine', 0.05, 900),
-  exchange: () => arpeggio([523, 659, 784, 1047], 0.07),
   win: () => arpeggio([523, 659, 784, 1047, 1319, 1568], 0.09),
 };
 

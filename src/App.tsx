@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { findExchange, isCoin, sumValues, type Denomination, type Exchange } from './lib/currency';
+import { DENOMINATIONS, isCoin, sumValues, type Denomination } from './lib/currency';
 import { say, setMuted, sfx, spokenRupees } from './lib/sound';
 import { useMoney, type Point } from './state/useMoney';
 import { useChallenges } from './state/useChallenges';
@@ -10,14 +10,11 @@ import { DragProvider, type DragPayload, type DropInfo } from './drag/DragProvid
 import { Header } from './components/Header';
 import { Toolbar } from './components/Toolbar';
 import { MoneyBank } from './components/MoneyBank';
-import { MyMoney, type Merge } from './components/MyMoney';
+import { MyMoney } from './components/MyMoney';
 import { Converter } from './components/Converter';
 import { ChallengeCard } from './components/ChallengeCard';
 import { Celebration } from './components/Celebration';
 import { moneyImage } from './components/money/Money';
-import { DENOMINATIONS } from './lib/currency';
-
-const MERGE_MS = 800;
 
 export default function App() {
   const money = useMoney();
@@ -25,15 +22,9 @@ export default function App() {
   const { items } = money;
   const values = useMemo(() => items.map((i) => i.value), [items]);
   const total = sumValues(values);
-  const nextExchange = useMemo(() => findExchange(items), [items]);
 
   const [muted, setMutedState] = useStoredState('money-master:muted', false);
   useEffect(() => setMuted(muted), [muted]);
-
-  const [exchanging, setExchanging] = useState<{ exchange: Exchange; merge: Merge } | null>(null);
-  const [flash, setFlash] = useState<(Point & { key: number }) | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const onChallengeDone = useCallback(() => sfx.win(), []);
   const challenges = useChallenges(values, onChallengeDone);
@@ -69,36 +60,19 @@ export default function App() {
     [add, remove, money],
   );
 
-  const runExchange = () => {
-    if (!nextExchange || exchanging) return;
-    const chosen = items.filter((i) => nextExchange.ids.includes(i.id));
-    const at = {
-      x: sumValues(chosen.map((i) => i.x)) / chosen.length,
-      y: sumValues(chosen.map((i) => i.y)) / chosen.length,
-    };
-    setExchanging({ exchange: nextExchange, merge: { ids: nextExchange.ids, ...at } });
-    sfx.whoosh();
-    timer.current = window.setTimeout(() => {
-      money.exchange(nextExchange.ids, nextExchange.to, at);
-      setExchanging(null);
-      setFlash({ ...at, key: Date.now() });
-      sfx.exchange();
-    }, MERGE_MS);
-  };
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !exchanging) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         money.undo();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [money, exchanging]);
+  }, [money]);
 
   return (
-    <DragProvider onDrop={handleDrop} disabled={!!exchanging}>
+    <DragProvider onDrop={handleDrop}>
       <div className="flex min-h-dvh flex-col xl:h-dvh xl:min-h-[720px]">
         <Header
           muted={muted}
@@ -109,7 +83,6 @@ export default function App() {
               hasMoney={items.length > 0}
               challengeOn={challenges.on}
               stars={challenges.completed.length}
-              busy={!!exchanging}
               onUndo={money.undo}
               onReset={money.reset}
               onTidy={money.tidy}
@@ -123,8 +96,6 @@ export default function App() {
           <MyMoney
             items={items}
             total={total}
-            merging={exchanging?.merge ?? null}
-            flash={flash}
             onRemove={remove}
             onTapMoney={(value) => say(spokenRupees(value))}
             banner={
@@ -142,13 +113,7 @@ export default function App() {
               </AnimatePresence>
             }
           />
-          <Converter
-            items={items}
-            total={total}
-            nextExchange={nextExchange}
-            exchanging={exchanging?.exchange ?? null}
-            onExchange={runExchange}
-          />
+          <Converter items={items} total={total} />
         </main>
 
         <p className="px-4 pb-2 text-center text-[11px] font-semibold text-ink/35">

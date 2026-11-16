@@ -44,7 +44,7 @@ export const CHALLENGES: Challenge[] = [
       const best = countPieces(greedyChange(100)!);
       return values.length === best
         ? { done: true, message: 'Just one note! That is the fewest possible.' }
-        : { done: false, message: `That's ₹100 with ${values.length} pieces. Can you do it with ${best}? Try "Exchange Money"!` };
+        : { done: false, message: `That's ₹100 with ${values.length} pieces. Can you do it with ${best}? Try bigger notes!` };
     },
   },
   makeAmount('make-500', '🚀', 500, 'Can you make ₹500?', 'Any mix of money is fine.'),

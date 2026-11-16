@@ -1,19 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DENOMINATIONS,
   alternativeCombinations,
   countPieces,
   expandParts,
   fewestPieces,
-  findExchange,
   greedyChange,
-  groupValues,
   sumParts,
   sumValues,
-  type Denomination,
 } from './currency';
-
-const items = (values: Denomination[]) => values.map((value, i) => ({ id: `i${i}`, value }));
 
 describe('greedyChange', () => {
   it('matches the examples from the brief', () => {
@@ -57,45 +51,6 @@ describe('alternativeCombinations', () => {
       expect(keys.size).toBe(ways.length);
       for (const w of ways) expect(sumParts(w)).toBe(total);
       expect(countPieces(ways[0])).toBe(countPieces(greedyChange(total)!));
-    }
-  });
-});
-
-describe('findExchange', () => {
-  it('swaps two ₹10 notes for one ₹20 note', () => {
-    expect(findExchange(items([10, 10]))).toMatchObject({ ids: ['i0', 'i1'], to: [{ value: 20, count: 1 }] });
-  });
-
-  it('returns null when the money already uses the fewest pieces', () => {
-    expect(findExchange(items([500, 200, 50]))).toBeNull();
-    expect(findExchange([])).toBeNull();
-  });
-
-  it('handles awkward sets like ₹2 + ₹2 + ₹2', () => {
-    const ex = findExchange(items([2, 2, 2]))!;
-    expect(sumParts(ex.to)).toBe(6);
-    expect(countPieces(ex.to)).toBe(2);
-  });
-
-  it('always keeps the total and ends at the fewest pieces', () => {
-    let seed = 7;
-    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (let run = 0; run < 300; run++) {
-      let pile = Array.from({ length: 1 + Math.floor(rand() * 14) }, (_, i) => ({
-        id: `r${run}-${i}`,
-        value: DENOMINATIONS[Math.floor(rand() * 7)],
-      }));
-      const total = sumValues(pile.map((p) => p.value));
-      let next = 0;
-      for (let ex = findExchange(pile); ex; ex = findExchange(pile)) {
-        const before = pile.length;
-        const step = ex;
-        expect(sumParts(step.from)).toBe(sumParts(step.to));
-        pile = pile.filter((p) => !step.ids.includes(p.id)).concat(expandParts(step.to).map((value) => ({ id: `n${next++}`, value })));
-        expect(pile.length).toBeLessThan(before);
-      }
-      expect(sumValues(pile.map((p) => p.value))).toBe(total);
-      expect(groupValues(pile.map((p) => p.value))).toEqual(greedyChange(total));
     }
   });
 });

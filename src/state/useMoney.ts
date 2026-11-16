@@ -1,5 +1,5 @@
 import { useMemo, useReducer } from 'react';
-import { DENOMINATIONS, expandParts, type Combination, type Denomination } from '../lib/currency';
+import { DENOMINATIONS, type Denomination } from '../lib/currency';
 
 export interface MoneyItem {
   id: string;
@@ -84,11 +84,6 @@ export function useMoney() {
       },
       remove(id: string) {
         apply((items) => (items.some((i) => i.id === id) ? items.filter((i) => i.id !== id) : items));
-      },
-      exchange(ids: string[], to: Combination, at: Point) {
-        const values = expandParts(to);
-        const fresh = values.map((v, k) => ({ ...newItem(v, { x: at.x + (k - (values.length - 1) / 2) * 16, y: at.y }), tilt: 0 }));
-        apply((items) => [...items.filter((i) => !ids.includes(i.id)), ...fresh]);
       },
       tidy() {
         apply((items) => (items.length ? tidyLayout(items) : items));

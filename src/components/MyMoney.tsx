@@ -3,25 +3,19 @@ import { AnimatePresence, motion } from 'motion/react';
 import { CURRENCY, groupValues, type Combination, type Denomination } from '../lib/currency';
 import { plural, rupees } from '../lib/format';
 import { useDrag } from '../drag/DragProvider';
-import type { MoneyItem, Point } from '../state/useMoney';
+import type { MoneyItem } from '../state/useMoney';
 import { Money } from './money/Money';
 import { AnimatedRupees, Panel } from './ui';
-
-export interface Merge extends Point {
-  ids: string[];
-}
 
 interface Props {
   items: MoneyItem[];
   total: number;
-  merging: Merge | null;
-  flash: (Point & { key: number }) | null;
   onRemove(id: string): void;
   onTapMoney(value: Denomination): void;
   banner?: ReactNode;
 }
 
-export function MyMoney({ items, total, merging, flash, onRemove, onTapMoney, banner }: Props) {
+export function MyMoney({ items, total, onRemove, onTapMoney, banner }: Props) {
   const parts = groupValues(items.map((i) => i.value));
   const notes = items.filter((i) => CURRENCY[i.value].kind === 'note').length;
   const coins = items.length - notes;
@@ -45,13 +39,13 @@ export function MyMoney({ items, total, merging, flash, onRemove, onTapMoney, ba
       bodyClassName="flex flex-col gap-3 p-3 sm:p-4"
     >
       {banner}
-      <MoneyTable items={items} merging={merging} flash={flash} onRemove={onRemove} onTapMoney={onTapMoney} />
+      <MoneyTable items={items} onRemove={onRemove} onTapMoney={onTapMoney} />
       <CountMyMoney parts={parts} total={total} />
     </Panel>
   );
 }
 
-function MoneyTable({ items, merging, flash, onRemove, onTapMoney }: Omit<Props, 'total' | 'banner'>) {
+function MoneyTable({ items, onRemove, onTapMoney }: Omit<Props, 'total' | 'banner'>) {
   const { tableRef, begin, active, over } = useDrag();
   const adding = active?.source === 'bank';
 
@@ -91,7 +85,6 @@ function MoneyTable({ items, merging, flash, onRemove, onTapMoney }: Omit<Props,
 
       <AnimatePresence>
         {items.map((item, index) => {
-          const isMerging = merging?.ids.includes(item.id) ?? false;
           const held = active?.id === item.id;
           return (
             <motion.div
@@ -99,15 +92,9 @@ function MoneyTable({ items, merging, flash, onRemove, onTapMoney }: Omit<Props,
               className="money-item absolute cursor-grab touch-none select-none"
               style={{ zIndex: index + 1, x: '-50%', y: '-50%' }}
               initial={{ left: `${item.x}%`, top: `${item.y}%`, scale: 0.2, opacity: 0, rotate: item.tilt - 30 }}
-              animate={
-                isMerging
-                  ? { left: `${merging!.x}%`, top: `${merging!.y}%`, scale: 0.6, opacity: 1, rotate: 0 }
-                  : { left: `${item.x}%`, top: `${item.y}%`, scale: 1, opacity: held ? 0 : 1, rotate: item.tilt }
-              }
-              exit={isMerging ? { opacity: 0, scale: 0.3, transition: { duration: 0.12 } } : { scale: 0, opacity: 0, rotate: item.tilt + 45, transition: { duration: 0.22 } }}
-              transition={
-                held ? { duration: 0 } : isMerging ? { duration: 0.6, ease: [0.6, 0, 0.4, 1] } : { type: 'spring', stiffness: 380, damping: 22 }
-              }
+              animate={{ left: `${item.x}%`, top: `${item.y}%`, scale: 1, opacity: held ? 0 : 1, rotate: item.tilt }}
+              exit={{ scale: 0, opacity: 0, rotate: item.tilt + 45, transition: { duration: 0.22 } }}
+              transition={held ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 22 }}
               onPointerDown={(e) => begin(e, { source: 'table', id: item.id, value: item.value, size: 'md' }, () => onTapMoney(item.value))}
             >
               <div className="drop-shadow-[0_5px_6px_rgba(43,33,66,0.25)]">
@@ -125,40 +112,6 @@ function MoneyTable({ items, merging, flash, onRemove, onTapMoney }: Omit<Props,
             </motion.div>
           );
         })}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {flash && (
-          <motion.div
-            key={flash.key}
-            className="pointer-events-none absolute z-[70]"
-            style={{ left: `${flash.x}%`, top: `${flash.y}%`, x: '-50%', y: '-50%' }}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.9, delay: 0.2 }}
-          >
-            <motion.div
-              className="size-40 rounded-full border-[6px] border-amber-300"
-              initial={{ scale: 0.2 }}
-              animate={{ scale: 1.6 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-            />
-            {Array.from({ length: 10 }, (_, i) => {
-              const a = (i / 10) * Math.PI * 2;
-              return (
-                <motion.span
-                  key={i}
-                  className="absolute left-1/2 top-1/2 text-xl"
-                  initial={{ x: 0, y: 0, scale: 0.4 }}
-                  animate={{ x: Math.cos(a) * 110, y: Math.sin(a) * 90, scale: 1 }}
-                  transition={{ duration: 0.7, ease: 'easeOut' }}
-                >
-                  ✨
-                </motion.span>
-              );
-            })}
-          </motion.div>
-        )}
       </AnimatePresence>
     </div>
   );

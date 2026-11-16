@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { alternativeCombinations, countPieces, greedyChange, groupValues, signatureOf, type Combination, type Exchange } from '../lib/currency';
+import { alternativeCombinations, countPieces, greedyChange, groupValues, signatureOf, type Combination } from '../lib/currency';
 import { describeParts, plural, rupees } from '../lib/format';
 import type { MoneyItem } from '../state/useMoney';
 import { Mascot } from './Mascot';
@@ -11,12 +11,9 @@ import { KidButton, Panel } from './ui';
 interface Props {
   items: MoneyItem[];
   total: number;
-  nextExchange: Exchange | null;
-  exchanging: Exchange | null;
-  onExchange(): void;
 }
 
-export function Converter({ items, total, nextExchange, exchanging, onExchange }: Props) {
+export function Converter({ items, total }: Props) {
   const yours = groupValues(items.map((i) => i.value));
   const fewest = greedyChange(total) ?? [];
   const pieces = items.length;
@@ -25,8 +22,8 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
   const tip =
     total === 0
       ? "Hi, I'm Gullu! Put some money on the table and I'll show you how to make bigger money."
-      : nextExchange
-        ? 'Smaller money can join up! Press "Exchange Money" and watch.'
+      : pieces > fewestCount
+        ? `Look! Your ${pieces} pieces are the same as just ${fewestCount}. Small money joins up into big money!`
         : pieces === 1
           ? `One ${rupees(total)} piece. Can you make the same amount with smaller money?`
           : `Wow! You're using the fewest pieces possible for ${rupees(total)}. ⭐`;
@@ -50,13 +47,6 @@ export function Converter({ items, total, nextExchange, exchanging, onExchange }
               <PieceGroup parts={fewest} size="sm" />
             </Row>
 
-            <AnimatePresence>{exchanging && <ExchangeBanner exchange={exchanging} />}</AnimatePresence>
-          </div>
-
-          <div className="rounded-3xl bg-gradient-to-br from-amber-50 to-lilac-50 p-4 ring-1 ring-amber-200/60">
-            <KidButton variant="saffron" big className="w-full" disabled={!nextExchange || !!exchanging} onClick={onExchange}>
-              <span className="text-2xl">🔄</span> Exchange Money
-            </KidButton>
           </div>
 
           <OtherWays key={total} total={total} yours={yours} />
@@ -76,31 +66,6 @@ function Row({ label, detail, children }: { label: string; detail: string; child
       </div>
       {children}
     </div>
-  );
-}
-
-/** Plays over the converter while notes merge on the table: "2 × ₹10 → 1 × ₹20". */
-function ExchangeBanner({ exchange }: { exchange: Exchange }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/95 p-4 backdrop-blur-sm"
-    >
-      <motion.div initial={{ scale: 1 }} animate={{ scale: 0.85, opacity: 0.6 }} transition={{ duration: 0.6 }}>
-        <PieceGroup parts={exchange.from} size="sm" />
-      </motion.div>
-      <motion.span initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-3xl">
-        ⬇️
-      </motion.span>
-      <motion.div initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1.1, rotate: 0 }} transition={{ delay: 0.35, type: 'spring', stiffness: 300, damping: 12 }}>
-        <PieceGroup parts={exchange.to} size="md" />
-      </motion.div>
-      <p className="text-center text-xl font-extrabold text-violet-700">
-        {describeParts(exchange.from)} → {describeParts(exchange.to)}
-      </p>
-    </motion.div>
   );
 }
 
