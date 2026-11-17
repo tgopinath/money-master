@@ -18,12 +18,47 @@ export const TITLES: Record<View, string> = { play: 'Money Master', challenges: 
 export const backState = { celebrating: false };
 
 const kit = (window as unknown as { KolamM3?: Kit }).KolamM3;
+
+// iPhone app mode (Apple HIG, from the shared Kolam iOS kit in public/ios). Only inside the MoneyMaster-iOS shell
+// (or ?app=ios); KolamIOS.init returns null in a browser. If both kits match, iOS wins.
+type IOSAction = { id?: string; icon?: string; text?: string; label?: string; onClick?: () => void };
+type IOSKit = {
+  isIOS: boolean;
+  detect(tokens?: string[]): boolean;
+  init(o: unknown): unknown;
+  navBar: { set(cfg: { title: string; large?: boolean; actions?: IOSAction[]; keepTitle?: boolean }): void };
+  tabBar: { select(id: string | null): void; badge(id: string, n: number | string | null): void };
+  enhance(el?: Element | null): void;
+};
+const iosKit = (window as unknown as { KolamIOS?: IOSKit }).KolamIOS;
+const SPEAKER_OFF = '<svg class="ios-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg>';
+export const ios: IOSKit | null =
+  iosKit && (iosKit.isIOS || iosKit.detect(['MoneyMaster-iOS'])) &&
+  iosKit.init({
+    appName: 'Money Master', uaTokens: ['MoneyMaster-iOS'], tint: '#a84508',
+    tabs: [
+      { id: 'play', label: 'Play', icon: 'house', href: '#/' },
+      { id: 'challenges', label: 'Challenges', icon: 'star', href: '#/challenges' },
+      { id: 'change', label: 'Bigger money', icon: 'arrow.clockwise', href: '#/change' },
+    ],
+    currentTab: VIEW_OF_HASH(location.hash), content: '#root',
+  })
+    ? iosKit
+    : null;
+if (ios) document.documentElement.classList.remove('k-android', 'k-app');
+export const iosMuteAction = (muted: boolean): IOSAction => ({
+  id: 'iosMute', icon: muted ? SPEAKER_OFF : 'speaker.wave.2', label: muted ? 'Turn sound on' : 'Turn sound off',
+  onClick: () => window.dispatchEvent(new Event('mm:mute')),
+});
+/** Android (M3) or iPhone (HIG) app: both split the screen into Play / Challenges / Bigger money. */
+export const inApp = () => m3.enabled || !!ios;
+
 export const muteAction = (muted: boolean) => ({
   id: 'm3Mute', icon: muted ? 'volume_off' : 'volume_up', label: muted ? 'Turn sound on' : 'Turn sound off',
   onClick: () => window.dispatchEvent(new Event('mm:mute')),
 });
 
-export const m3: M3 = kit?.isAndroid
+export const m3: M3 = kit?.isAndroid && !ios
   ? kit.init({
       primary: '#c55410',
       title: TITLES[VIEW_OF_HASH(location.hash)],

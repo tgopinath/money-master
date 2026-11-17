@@ -133,3 +133,19 @@ html.k-android .kid-btn.bg-white { background: transparent; color: var(--md-sys-
   html.k-android[data-mm-view='change'] .mm-main > :nth-child(-n + 2) { display: none; }
   html.k-android:not([data-mm-view='change']) .mm-main > :nth-child(3) { display: none; }
 }
+
+/* ---------- iPhone app mode (Apple HIG) ----------
+   public/ios/kolam-ios.css builds the navigation bar (large title, sound button) and the Liquid Glass tab bar.
+   Here Money Master's panels and buttons get iOS shapes, and on phones each tab shows its own panels, as in the
+   Android app. Only html.k-ios (inside the iPhone app, or ?app=ios) is touched; the website keeps its look. */
+html.k-ios #root { padding: 0; }
+html.k-ios .mm-header { display: none; } /* title, sound and challenges move to the navigation bar and tab bar */
+html.k-ios .mm-main { padding: 4px 16px calc(100px + env(safe-area-inset-bottom)); }
+html.k-ios .mm-panel { border-radius: 26px; background: var(--ios-grouped2); box-shadow: none; --tw-ring-shadow: 0 0 #0000; }
+html.k-ios .kid-btn { border-radius: 999px; border-bottom-width: 0; min-height: 44px; box-shadow: none; font-family: var(--ios-font-rounded); }
+html.k-ios .kid-btn:active { transform: none; border-bottom-width: 0; opacity: .6; }
+html.k-ios .kid-btn.bg-white { background: color-mix(in srgb, var(--ios-tint) 14%, transparent); color: var(--ios-tint); }
+@media (max-width: 1023px) {
+  html.k-ios[data-mm-view='change'] .mm-main > :nth-child(-n + 2) { display: none; }
+  html.k-ios:not([data-mm-view='change']) .mm-main > :nth-child(3) { display: none; }
+}

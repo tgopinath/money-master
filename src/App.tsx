@@ -15,7 +15,7 @@ import { Converter } from './components/Converter';
 import { ChallengeCard } from './components/ChallengeCard';
 import { Celebration } from './components/Celebration';
 import { moneyImage } from './components/money/Money';
-import { backState, m3, muteAction, TITLES, VIEW_OF_HASH, type View } from './lib/m3';
+import { backState, inApp, ios, iosMuteAction, m3, muteAction, TITLES, VIEW_OF_HASH, type View } from './lib/m3';
 
 export default function App() {
   const money = useMoney();
@@ -33,7 +33,7 @@ export default function App() {
   // Android app (M3): three destinations, Play, Challenges and Bigger money, from the URL hash
   const [view, setView] = useState<View>(() => VIEW_OF_HASH(location.hash));
   useEffect(() => {
-    if (!m3.enabled) return;
+    if (!inApp()) return;
     const onHash = () => setView(VIEW_OF_HASH(location.hash));
     const onMute = () => setMutedState((m) => !m);
     window.addEventListener('hashchange', onHash);
@@ -41,14 +41,17 @@ export default function App() {
     return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('mm:mute', onMute); };
   }, [setMutedState]);
   useEffect(() => {
-    if (!m3.enabled) return;
+    if (!inApp()) return;
     document.documentElement.dataset.mmView = view;
     m3.setTitle(TITLES[view]);
+    if (ios) { ios.tabBar.select(view); ios.navBar.set({ title: TITLES[view], large: true, actions: [iosMuteAction(muted)], keepTitle: true }); }
     if (challenges.on !== (view === 'challenges')) challenges.toggle();
     window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
   useEffect(() => { if (m3.enabled) m3.setActions([muteAction(muted)]); }, [muted]);
+  useEffect(() => { if (ios) ios.navBar.set({ title: TITLES[view], large: true, actions: [iosMuteAction(muted)], keepTitle: true }); }, [muted]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ios) ios.tabBar.badge('challenges', challenges.completed.length || null); }, [challenges.completed.length]);
   useEffect(() => {
     if (!m3.enabled) return;
     const box = document.querySelector('.md-nav-item[data-dest="challenges"] .md-nav-indicator');
