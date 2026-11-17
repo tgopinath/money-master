@@ -27,7 +27,7 @@ interface PanelProps {
 export function Panel({ tone, step, title, subtitle, announce, right, className = '', bodyClassName = '', children }: PanelProps) {
   const t = TONES[tone];
   return (
-    <section className={`flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] bg-white/85 shadow-panel ring-1 ring-ink/5 ${className}`}>
+    <section className={`mm-panel flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[28px] bg-white/85 shadow-panel ring-1 ring-ink/5 ${className}`}>
       <header className={`flex items-center gap-3 px-5 py-3 ${t.header}`}>
         <span className={`grid size-9 shrink-0 place-items-center rounded-full text-lg font-extrabold text-white shadow-sm ${t.badge}`}>{step}</span>
         <div className="min-w-0 flex-1">
@@ -75,7 +75,7 @@ export function KidButton({
   return (
     <button
       type="button"
-      className={`inline-flex select-none items-center justify-center gap-2 rounded-2xl border-b-4 font-extrabold transition
+      className={`kid-btn inline-flex select-none items-center justify-center gap-2 rounded-2xl border-b-4 font-extrabold transition
         hover:brightness-105 active:translate-y-0.5 active:border-b-2 disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 disabled:active:border-b-4
         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-saffron-300
         ${big ? 'px-6 py-3 text-xl' : 'px-4 py-2 text-base'} ${VARIANTS[variant]} ${className}`}

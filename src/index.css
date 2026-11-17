@@ -113,3 +113,23 @@ body.is-dragging * {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ---------- Android app mode (Material Design 3) ----------
+   public/m3/kolam-m3.css builds the app bar and navigation bar. Here Money Master's own panels and buttons get
+   M3 shapes, and on phones each destination shows its own panels. Only html.k-android (inside the Android app)
+   is touched; the website keeps its look. Unlayered, so these win over Tailwind's utilities. */
+html.k-android {
+  --md-ref-typeface-brand: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+  --md-ref-typeface-plain: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+}
+html.k-android #root { padding: 0; }
+html.k-android .mm-header { display: none; } /* title, sound and challenges move to the app bar and navigation bar */
+html.k-android .mm-main { padding: 8px 16px 16px; }
+html.k-android .mm-panel { border-radius: var(--md-sys-shape-corner-extra-large); background: var(--md-sys-color-surface-container-lowest); box-shadow: var(--md-sys-elevation-level1); }
+html.k-android .kid-btn { border-radius: var(--md-sys-shape-corner-full); border-bottom-width: 0; min-height: 40px; box-shadow: none; }
+html.k-android .kid-btn:active { transform: none; border-bottom-width: 0; }
+html.k-android .kid-btn.bg-white { background: transparent; color: var(--md-sys-color-primary); box-shadow: inset 0 0 0 1px var(--md-sys-color-outline); }
+@media (max-width: 1023px) {
+  html.k-android[data-mm-view='change'] .mm-main > :nth-child(-n + 2) { display: none; }
+  html.k-android:not([data-mm-view='change']) .mm-main > :nth-child(3) { display: none; }
+}

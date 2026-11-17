@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { DENOMINATIONS, isCoin, sumValues, type Denomination } from './lib/currency';
 import { say, setMuted, sfx, spokenRupees } from './lib/sound';
@@ -15,6 +15,7 @@ import { Converter } from './components/Converter';
 import { ChallengeCard } from './components/ChallengeCard';
 import { Celebration } from './components/Celebration';
 import { moneyImage } from './components/money/Money';
+import { backState, m3, muteAction, TITLES, VIEW_OF_HASH, type View } from './lib/m3';
 
 export default function App() {
   const money = useMoney();
@@ -28,6 +29,42 @@ export default function App() {
 
   const onChallengeDone = useCallback(() => sfx.win(), []);
   const challenges = useChallenges(values, onChallengeDone);
+
+  // Android app (M3): three destinations, Play, Challenges and Bigger money, from the URL hash
+  const [view, setView] = useState<View>(() => VIEW_OF_HASH(location.hash));
+  useEffect(() => {
+    if (!m3.enabled) return;
+    const onHash = () => setView(VIEW_OF_HASH(location.hash));
+    const onMute = () => setMutedState((m) => !m);
+    window.addEventListener('hashchange', onHash);
+    window.addEventListener('mm:mute', onMute);
+    return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('mm:mute', onMute); };
+  }, [setMutedState]);
+  useEffect(() => {
+    if (!m3.enabled) return;
+    document.documentElement.dataset.mmView = view;
+    m3.setTitle(TITLES[view]);
+    if (challenges.on !== (view === 'challenges')) challenges.toggle();
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
+  useEffect(() => { if (m3.enabled) m3.setActions([muteAction(muted)]); }, [muted]);
+  useEffect(() => {
+    if (!m3.enabled) return;
+    const box = document.querySelector('.md-nav-item[data-dest="challenges"] .md-nav-indicator');
+    if (!box) return;
+    let b = box.querySelector<HTMLElement>('.md-badge');
+    if (!b) { b = document.createElement('span'); b.className = 'md-badge md-badge--large'; box.appendChild(b); }
+    b.textContent = String(challenges.completed.length);
+    b.hidden = challenges.completed.length === 0;
+    b.setAttribute('aria-label', `${challenges.completed.length} stars`);
+  }, [challenges.completed.length]);
+  backState.celebrating = !!challenges.celebrating;
+  useEffect(() => {
+    const onDismiss = () => challenges.dismiss();
+    window.addEventListener('mm:dismiss', onDismiss);
+    return () => window.removeEventListener('mm:dismiss', onDismiss);
+  }, [challenges]);
 
   const bankSize = useMediaQuery('(min-width: 1280px)') ? 'lg' : 'md';
 
@@ -80,7 +117,7 @@ export default function App() {
           actions={<ChallengeToggle on={challenges.on} stars={challenges.completed.length} onToggle={challenges.toggle} />}
         />
 
-        <main className="grid min-h-0 flex-1 gap-4 p-4 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(340px,1fr)] xl:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)_minmax(330px,1fr)]">
+        <main className="mm-main grid min-h-0 flex-1 gap-4 p-4 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(340px,1fr)] xl:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)_minmax(330px,1fr)]">
           <MoneyBank size={bankSize} onAdd={add} className="lg:col-span-2 xl:col-span-1" />
           <MyMoney
             items={items}
